@@ -3,9 +3,10 @@ import { Course } from "@/model/course-model";
 import { Module } from "@/model/module-model";
 import { Testimonial } from "@/model/testimonial-model";
 import { User } from "@/model/user-model";
+import { replaceMongoIdInArray } from "@/lib/convertData";
 
-export async function getCourses() {
-    const courses = await Course.find({}).populate({
+export async function getCourseList() {
+    const courses = await Course.find({}).select(['title','subtitle','thumbnail','price','category','modules','instructor']).populate({
         path:'category',
         model:Category
     }).populate({
@@ -17,6 +18,6 @@ export async function getCourses() {
     }).populate({
         path:'modules',
         model:Module
-    });
-    return courses;
+    }).lean();
+    return replaceMongoIdInArray(courses);
 }
