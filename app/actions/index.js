@@ -1,0 +1,18 @@
+'use server'
+import { signIn } from "@/auth"
+
+export async function credentialLogin(formData) {
+    try {
+        const response = await signIn("credentials",{
+            email:formData.get("email"),
+            password:formData.get("password"),
+            redirect:false
+        })
+        console.log('Hisdf');
+        
+        return response;
+    } catch (error) {
+        console.log('rt6h');
+        throw new Error(error);
+    }
+}
