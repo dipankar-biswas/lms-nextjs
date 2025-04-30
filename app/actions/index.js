@@ -8,11 +8,9 @@ export async function credentialLogin(formData) {
             password:formData.get("password"),
             redirect:false
         })
-        console.log('Hisdf');
         
         return response;
     } catch (error) {
-        console.log('rt6h');
         throw new Error(error);
     }
 }
