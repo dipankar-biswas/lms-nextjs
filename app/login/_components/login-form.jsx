@@ -25,16 +25,16 @@ export function LoginForm() {
       try {
         const formData = new FormData(event.currentTarget);
         const response = await credentialLogin(formData);
-        console.log(response);
+        // console.log(response);
         
         if(!!response.error){
-          console.log(response.error);
+          // console.log(response.error);
           setError(response.error);
         }else{
           router.push('/courses');
         }
       } catch (err) {
-        console.log(err.message);
+        // console.log(err.message);
         setError(err.message);
       }
   

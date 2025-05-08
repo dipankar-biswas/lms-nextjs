@@ -17,23 +17,23 @@ export const {
 
                 try {
                     const user = await User.findOne({email:credentials.email});
-                    console.log(user);
+                    // console.log(user);
 
                     if(user){
                         const isMatch = await bcrypt.compare(credentials.password,user.password);
                         if(isMatch){
                             return user;
                         }else{
-                            console.error("Password Mismatch");
+                            // console.error("Password Mismatch");
                             throw new Error("Check Your Password");
                         }
                     }else{
-                        console.error("User not found!");
+                        // console.error("User not found!");
                         throw new Error("User not found!");
                     }
                     
                 } catch (err) {
-                    console.error(err)
+                    // console.error(err)
                     throw new Error(err);
                 }
             }
