@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { credentialLogin } from "@/app/actions";
+import { toast } from "sonner";
 
 export function LoginForm() {
 
@@ -31,10 +32,12 @@ export function LoginForm() {
           // console.log(response.error);
           setError(response.error);
         }else{
+          toast.success('Login Successfully');
           router.push('/courses');
         }
       } catch (err) {
         // console.log(err.message);
+        toast.error(`Error:${err}`);
         setError(err.message);
       }
   

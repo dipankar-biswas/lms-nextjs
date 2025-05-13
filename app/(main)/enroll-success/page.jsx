@@ -1,7 +1,9 @@
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { sendEmails } from "@/lib/emails";
 import { stripe } from "@/lib/stripe";
 import { getCourseDetails } from "@/queries/courses";
+import { enrollmentForCourse } from "@/queries/enrollments";
 import { getUserByEmail } from "@/queries/users";
 import { CircleCheck } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +27,7 @@ const Success = async ({ searchParams: { session_id, courseId } }) => {
   const customerName = `${loggedInUser?.firstName} ${loggedInUser?.lastName}`;
   const customerEmail = loggedInUser?.email;
   const productName = course?.title;
-  console.log(customerName,customerEmail,productName);
+  // console.log(customerName,customerEmail,productName);
   
 
   const checkoutSession = await stripe.checkout.sessions.retrieve(session_id, {
@@ -37,9 +39,36 @@ const Success = async ({ searchParams: { session_id, courseId } }) => {
 
   if (paymentStatus === "succeeded") {
     // Update data to enrollment table
+    const enrolled = await enrollmentForCourse(
+      course?.id,
+      loggedInUser?.id,
+      "stripe"
+    );
+    // console.log(enrolled);
+    
 
 
     // Send emails to the instructor and student who paid
+    const instructorName = `${course?.instructor?.firstName} ${course?.instructor?.lastName}`;
+    const instructorEmail = course?.instructor?.email;
+
+
+    const emailsToSend = [
+            {
+                to: instructorEmail,
+                subject: `New Enrollment for ${productName}`,
+                message: `Congratulations, ${instructorName}. A new student, ${customerName} has enrolled to your course ${productName} just now.`
+            },
+            {
+              to: customerEmail,
+              subject: `Enrollment success for ${productName}`,
+              message: `Hey, ${instructorName}. You have successfully enrolled for the course ${productName}`
+          }
+        ];
+    
+    const emailSendResponse = await sendEmails(emailsToSend);
+    console.log(emailSendResponse);
+    
   }
 
 
