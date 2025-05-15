@@ -18,9 +18,22 @@ const MainNav = ({ items, children }) => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [loginSession, setLoginSession] = useState(null);
 
+    const [loggedInUser, setLoggedInUser] = useState(null);
+
     useEffect(() => {
-        // console.log("Test Information");
         setLoginSession(session);
+
+        async function fetchMe() {
+            try {
+                const response = await fetch("/api/me");
+                const data = await response.json();
+                // console.log(data);
+                setLoggedInUser(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        fetchMe();
     }, [session])
 
     return (
@@ -77,7 +90,7 @@ const MainNav = ({ items, children }) => {
                             <DropdownMenuTrigger asChild>
                                 <div className='cursor-pointer'>
                                     <Avatar>
-                                        <AvatarImage src="https://github.com/shadcn.png" alt="@dipankar" />
+                                        <AvatarImage src={loggedInUser?.profilePicture} alt={`${loggedInUser?.firstName} ${loggedInUser?.lastName}`} />
                                     </Avatar>
                                 </div>
                             </DropdownMenuTrigger>
@@ -85,6 +98,13 @@ const MainNav = ({ items, children }) => {
                                 <DropdownMenuItem className='cursor-pointer' asChild>
                                     <Link href='/account'>Profile</Link>
                                 </DropdownMenuItem>
+
+                                {loggedInUser?.role === "instructor" && (
+                                    <DropdownMenuItem className='cursor-pointer' asChild>
+                                    <Link href='/dashboard'><strong>Instructor Dashboard</strong></Link>
+                                </DropdownMenuItem>
+                                )}
+
                                 <DropdownMenuItem className='cursor-pointer' asChild>
                                     <Link href='/account/enrolled-courses'>My Courses</Link>
                                 </DropdownMenuItem>

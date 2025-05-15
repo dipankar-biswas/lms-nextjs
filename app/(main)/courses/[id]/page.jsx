@@ -6,9 +6,9 @@ import RelatedCourse from "./_components/RelatedCourse";
 import { getCourseDetails } from '@/queries/courses';
 import { replaceMongoIdInArray } from '@/lib/convertData';
 
-const SingleCoursePage = async ({params}) => {
+const SingleCoursePage = async ({params:{id}}) => {
 
-  const course = await getCourseDetails(params.id);
+  const course = await getCourseDetails(id);
   
   
   return (
