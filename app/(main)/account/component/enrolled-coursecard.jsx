@@ -20,15 +20,15 @@ const EnrolledCourseCard = async({enrollment}) => {
     const quizzes = report?.quizAssessment?.assessments;
     const totalQuizzes = quizzes?.length;
 
-    const quizzesTaken = quizzes.filter(q => q.attempted);
+    const quizzesTaken = quizzes?.filter(q => q.attempted);
     
     // find how many quizzes answered correct
-    const totalCorrect = quizzesTaken.map(quiz => {
+    const totalCorrect = quizzesTaken?.map(quiz => {
         const item = quiz?.options;
         return item.filter(o => {
             return o?.isCorrect === true && o.isSelected === true;
         })
-    }).filter(elem => elem.length > 0).flat();
+    })?.filter(elem => elem.length > 0)?.flat();
 
     
     const marksFromQuizzes = totalCorrect?.length * 5;

@@ -15,7 +15,7 @@ const enrollmentSchema = new Schema({
   },
   method: {
     required: true,
-    type: Number,
+    type: String,
   },
   course: {
     type: Schema.ObjectId,
