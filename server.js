@@ -14,7 +14,7 @@ app.prepare().then(() => {
   }).listen(port)
  
   console.log(
-    `> Server listening at https://lms.devultd.com/:${port} as ${
+    `> Server listening at http://localhost:${port} as ${
       dev ? 'development' : process.env.NODE_ENV
     }`
   )

@@ -43,7 +43,7 @@ export const columns = [
     },
     cell: ({row}) => {
       const rating = row.getValue("rating");
-      return <div className="flex"><StarRating rating={rating} /></div>;
+      return <div className="flex"><StarRating rating={rating} /> ({rating})</div>;
     }
   },
   {

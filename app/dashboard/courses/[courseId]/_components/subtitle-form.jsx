@@ -1,11 +1,10 @@
 "use client";
 
+import * as z from "zod";
+// import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 
-import { Button } from "@/components/ui/button";
-import { Combobox } from "@/components/ui/combobox";
 import {
   Form,
   FormControl,
@@ -13,22 +12,21 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { updateCourse } from "@/app/actions/course";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  value: z.string().min(1),
+  subtitle: z.string().min(1, {
+    message: "SubTitle is required",
+  }),
 });
 
-export const CategoryForm = ({
-  initialData,
-  courseId,
-  options
-}) => {
+export const SubTitleForm = ({ initialData = {}, courseId }) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -36,55 +34,38 @@ export const CategoryForm = ({
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      value: initialData?.value || "",
-    },
+    defaultValues: initialData,
   });
 
   const { isSubmitting, isValid } = form.formState;
 
   const onSubmit = async (values) => {
     try {
-      const selectedCategory = options.find((option) => option.value === values.value);
-      await updateCourse(courseId,{ category: selectedCategory.id });
+      await updateCourse(courseId,values);
       toggleEdit();
       router.refresh();
-      toast.success("Course description updated");
+      toast.success("Course title updated");
     } catch (error) {
       toast.error("Something went wrong");
     }
   };
 
-  const selectedOptions = options.find(
-    (option) => option.value === initialData.value
-  );
-
   return (
     <div className="mt-6 border bg-gray-50 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Course Category
+        Course Subtitle
         <Button variant="ghost" onClick={toggleEdit}>
           {isEditing ? (
             <>Cancel</>
           ) : (
             <>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit Category
+              Edit SubTitle
             </>
           )}
         </Button>
       </div>
-      {!isEditing && (
-        <p
-          className={cn(
-            "text-sm mt-2",
-            !initialData.value && "text-slate-500 italic"
-          )}
-        >
-          {selectedOptions?.label || "No category"}
-        </p>
-      )}
-      {/* {console.log({ options })} */}
+      {!isEditing && <p className="text-sm mt-2">{initialData.subtitle}</p>}
       {isEditing && (
         <Form {...form}>
           <form
@@ -93,11 +74,15 @@ export const CategoryForm = ({
           >
             <FormField
               control={form.control}
-              name="value"
+              name="subtitle"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Combobox options={options} {...field} />
+                    <Input
+                      disabled={isSubmitting}
+                      placeholder="e.g. 'Advanced web development'"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

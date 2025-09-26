@@ -12,6 +12,7 @@ const EnrollmentsPage = async ({ params: { courseId } }) => {
   const EnrollmentData = sanitizeData(allEnrollments);
   const enrollmentDataForCourse = EnrollmentData.filter((enrollment) => enrollment?.course?.toString() === courseId);
   
+  
 
   return (
     <div className="p-6">

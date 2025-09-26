@@ -8,7 +8,7 @@ import { getEnrollmentsForCourse } from "./enrollments";
 import { getTestimonialsForCourse } from "./testimonials";
 
 export async function getCourseList() {
-    const courses = await Course.find({}).select(['title', 'subtitle', 'thumbnail', 'price', 'category', 'modules', 'instructor']).populate({
+    const courses = await Course.find({active:true}).select(['title', 'subtitle', 'thumbnail', 'price', 'category', 'modules', 'instructor']).populate({
         path: 'category',
         model: Category
     }).populate({
@@ -58,10 +58,14 @@ function groupBy(array, keyFn) {
 }
 
 export async function getCourseDetailsByInstructor(instructorId,expand) {
-    const courses = await Course.find({ instructor: instructorId })
+    const publishCourses = await Course.find({ instructor: instructorId, active: true })
         .populate({
             path: 'category',
             model: Category,
+        })
+        .populate({
+            path: 'testimonials',
+            model: Testimonial,
         })
         .populate({
             path: 'instructor',
@@ -70,7 +74,7 @@ export async function getCourseDetailsByInstructor(instructorId,expand) {
         .lean();
 
     const enrollments = await Promise.all(
-        courses.map(async (course) => {
+        publishCourses.map(async (course) => {
             const enrollment = await getEnrollmentsForCourse(course._id.toString());
             return enrollment;
         })
@@ -84,7 +88,7 @@ export async function getCourseDetailsByInstructor(instructorId,expand) {
 
 
     // Calculate total revenue
-    const totalRevenue = courses.reduce((acc, course) => {
+    const totalRevenue = publishCourses.reduce((acc, course) => {
         const enrollmentsForCourse = groupByCourses[course._id] || [];
         return acc + enrollmentsForCourse.length * course.price;
     }, 0);
@@ -95,7 +99,7 @@ export async function getCourseDetailsByInstructor(instructorId,expand) {
     }, 0);
 
     const testimonials = await Promise.all(
-        courses.map(async (course) => {
+        publishCourses.map(async (course) => {
             const testimonial = await getTestimonialsForCourse(course._id.toString());
             return testimonial;
         })
@@ -108,16 +112,17 @@ export async function getCourseDetailsByInstructor(instructorId,expand) {
     }, 0)) / totalTestimonials.length;
 
 
-    const firstName = courses.length > 0 ? courses[0].instructor?.firstName : "Unknown";
-    const lastName = courses.length > 0 ? courses[0].instructor?.lastName : "Unknown";
+    const firstName = publishCourses.length > 0 ? publishCourses[0].instructor?.firstName : "Unknown";
+    const lastName = publishCourses.length > 0 ? publishCourses[0].instructor?.lastName : "Unknown";
     const fullInName = `${firstName} ${lastName}`;
-    const Designation = courses.length > 0 ? courses[0].instructor?.designation : "Unknown";
-    const profilePicture = courses.length > 0 ? courses[0].instructor?.profilePicture : "Unknown";
-    const bio = courses.length > 0 ? courses[0].instructor?.bio : "Unknown";
+    const Designation = publishCourses.length > 0 ? publishCourses[0].instructor?.designation : "Unknown";
+    const profilePicture = publishCourses.length > 0 ? publishCourses[0].instructor?.profilePicture : "Unknown";
+    const bio = publishCourses.length > 0 ? publishCourses[0].instructor?.bio : "Unknown";
 
     if(expand){
+        const allCourses = await Course.find({ instructor: instructorId })
         return {
-            "courses" : courses?.flat(),
+            "courses" : allCourses?.flat(),
             "enrollments" : enrollments?.flat(),
             "reviews" : totalTestimonials,
         }
@@ -126,16 +131,25 @@ export async function getCourseDetailsByInstructor(instructorId,expand) {
 
 
     return {
-        "courses": courses.length,
+        "courses": publishCourses.length,
         "enrollments": totalEnrollments,
         "reviews": totalTestimonials.length,
         "ratings": avgRating.toPrecision(2),
-        "inscourses": courses,
+        "inscourses": publishCourses,
         "revenue": totalRevenue,
         fullInName,
         Designation,
         profilePicture,
         bio,
-
     };
+}
+
+
+export async function create(courseData){
+    try {
+        const course = await Course.create(courseData);
+        return JSON.parse(JSON.stringify(course));
+    }catch (error) {
+        throw new Error(error);
+    }
 }
