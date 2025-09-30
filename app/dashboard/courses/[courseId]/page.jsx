@@ -1,10 +1,12 @@
 import { IconBadge } from "@/components/icon-badge";
 import {
+  ArrowLeft,
   CircleDollarSign,
   File,
   LayoutDashboard,
   ListChecks,
 } from "lucide-react";
+import Link from "next/link";
 import { CategoryForm } from "./_components/category-form";
 import { DescriptionForm } from "./_components/description-form";
 import { ImageForm } from "./_components/image-form";
@@ -17,6 +19,8 @@ import { QuizSetForm } from "./_components/quiz-set-form";
 import { getCourseDetails } from "@/queries/courses";
 import { SubTitleForm } from "./_components/subtitle-form";
 import { getCategories } from "@/queries/categories";
+import { replaceMongoIdInArray } from "@/lib/convertData";
+import { ObjectId } from "mongoose";
 
 const EditCourse = async ({ params: {courseId} }) => {
 
@@ -31,16 +35,53 @@ const EditCourse = async ({ params: {courseId} }) => {
   });
   // console.log(mappedCategories);
 
+  // Sanitize function for handle ObjectId and Buffer
+  function sanitizeData(data){
+    return JSON.parse(
+      JSON.stringify(data,(key,value) => {
+        if(value instanceof ObjectId){
+          return value.toString();
+        }
+        if(Buffer.isBuffer(value)){
+          return value.toString("base64");
+        }
+        return value;
+      })
+    )
+  }
+
+  const rawmodules = await replaceMongoIdInArray(course?.modules).sort((a,b) => a.order - b.order);
+  const modules = sanitizeData(rawmodules)
+
+
+
   return (
     <>
-      <AlertBanner
-        label="This course is unpublished. It will not be visible in the course."
-        variant="warning"
-      />
+      {
+      !course?.active && (
+        <AlertBanner
+          label="This course is unpublished. It will not be visible in the course."
+          variant="warning"
+        />
+        )
+      }
       <div className="p-6">
-        <div className="flex items-center justify-end">
-          <CourseActions />
+        <div className="flex items-center justify-between">
+          <div className="w-full">
+            <Link
+              href={`/dashboard/courses`}
+              className="flex items-center text-sm hover:opacity-75 transition mb-6"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to course setup
+            </Link>
+            <div className="flex items-center justify-end">
+              <CourseActions courseId={courseId} isActive={course?.active} />
+            </div>
+          </div>
         </div>
+
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
           <div>
             <div className="flex items-center gap-x-2">
@@ -82,7 +123,8 @@ const EditCourse = async ({ params: {courseId} }) => {
                 <h2 className="text-xl">Course Modules</h2>
               </div>
 
-              <ModulesForm initialData={[]} courseId={[]} />
+              <ModulesForm initialData={modules} courseId={courseId} />
+
             </div>
             <div>
               <div className="flex items-center gap-x-2">

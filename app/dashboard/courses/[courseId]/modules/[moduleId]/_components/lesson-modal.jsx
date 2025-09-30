@@ -16,8 +16,13 @@ import { LessonTitleForm } from "./lesson-title-form";
 import { LessonDescriptionForm } from "./lesson-description-form";
 import { LessonAccessForm } from "./lesson-access-form";
 import { VideoUrlForm } from "./video-url-form";
-import { CourseActions } from "../../../_components/course-action";
-export const LessonModal = ({ open, setOpen }) => {
+import { LessonActions } from "./lesson-action";
+export const LessonModal = ({ open, setOpen, courseId, lesson, moduleId }) => {
+  
+  function postDelete() {
+    setOpen(false);
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {/* <DialogTrigger>Open</DialogTrigger> */}
@@ -27,18 +32,24 @@ export const LessonModal = ({ open, setOpen }) => {
           e.preventDefault();
         }}
       >
+        <DialogHeader>
+          <DialogTitle>Lesson Editor</DialogTitle>
+          <DialogDescription>
+            Customize and manage the settings for this lesson.
+          </DialogDescription>
+        </DialogHeader>
         <div>
           <div className="flex items-center justify-between">
             <div className="w-full">
               <Link
-                href={`/dashboard/courses/${1}`}
+                href={`/dashboard/courses/${courseId}`}
                 className="flex items-center text-sm hover:opacity-75 transition mb-6"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to course setup
               </Link>
               <div className="flex items-center justify-end">
-                <CourseActions />
+                <LessonActions lesson={lesson} moduleId={moduleId} onDelete={postDelete} courseId={courseId} />
               </div>
             </div>
           </div>
@@ -50,14 +61,14 @@ export const LessonModal = ({ open, setOpen }) => {
                   <h2 className="text-xl">Customize Your chapter</h2>
                 </div>
                 <LessonTitleForm
-                  initialData={{}}
-                  courseId={"1"}
-                  lessonId={"1"}
+                  initialData={{ title: lesson?.title }}
+                  courseId={ courseId }
+                  lessonId={ lesson?.id }
                 />
                 <LessonDescriptionForm
-                  initialData={{}}
-                  courseId={"1"}
-                  lessonId={"1"}
+                  initialData={{ description: lesson?.description }}
+                  courseId={ courseId }
+                  lessonId={ lesson?.id }
                 />
               </div>
               <div>
@@ -66,9 +77,9 @@ export const LessonModal = ({ open, setOpen }) => {
                   <h2 className="text-xl">Access Settings</h2>
                 </div>
                 <LessonAccessForm
-                  initialData={{}}
-                  courseId={"1"}
-                  chapterId={"1"}
+                  initialData={{ isFree: lesson?.access !== 'private' }}
+                  courseId={ courseId }
+                  lessonId={ lesson?.id }
                 />
               </div>
             </div>
@@ -79,10 +90,11 @@ export const LessonModal = ({ open, setOpen }) => {
               </div>
               <VideoUrlForm
                 initialData={{
-                  url: "https://www.youtube.com/embed/LJi2tiWiYmI?si=-vs8fO-xzWmu7ztG",
+                  url: lesson?.video_url,
+                  duration: lesson?.duration,
                 }}
-                courseId={1}
-                lessonId={1}
+                courseId={ courseId }
+                lessonId={ lesson?.id }
               />
             </div>
           </div>

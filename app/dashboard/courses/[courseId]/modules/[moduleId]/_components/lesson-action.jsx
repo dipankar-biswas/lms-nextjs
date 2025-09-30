@@ -4,48 +4,51 @@ import { Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { changeCoursePublishState, deleteCourse } from "@/app/actions/course";
+import { changeLessonPublishState, deleteLesson } from "@/app/actions/lesson";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export const CourseActions = ({ courseId, isActive }) => {
+
+export const LessonActions = ({ lesson, moduleId, onDelete, courseId }) => {
 
   const [action, setAction] = useState(null);
-  const [published, setPublished] = useState(isActive);
+  const [published, setPublished] = useState(lesson?.active);
   const router = useRouter();
 
+  
   async function handleSubmit(e) {
     e.preventDefault();
     // console.log(action);
     try {
       switch (action) {
         case "change-active": {
-              const activeState = await changeCoursePublishState(courseId);
+              const activeState = await changeLessonPublishState(lesson?.id);
               setPublished(!activeState);
-              toast.success("The course has been updated successfully.");
+              toast.success("The lesson has been updated successfully.");
               router.refresh();
               break
             }
         case "delete": {
               if (published) {
-                toast.error("Please unpublish course can not be deleted. First unpublish it, then delete it.");
+                toast.error("Please unpublish lesson can not be deleted. First unpublish it, then delete it.");
               }else{
-                await deleteCourse(courseId);
-                toast.success("Course deleted successfully!");
-                router.push(`/dashboard/courses`);
+                await deleteLesson(lesson?.id, moduleId);
+                toast.success("Lesson deleted successfully!");
+                onDelete();
+                router.push(`/dashboard/courses/${courseId}/modules/${moduleId}`);
               }
               break;
             }
         default:
-          throw toast.error("Invalid Course action.");
+          throw toast.error("Invalid Lesson action.");
       }
     } catch (error) {
       toast.error(error.message);
     }
   }
-  
+
   return (
-  <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       <div className="flex items-center gap-x-2">
         <Button variant="outline" size="sm" onClick={() => setAction("change-active")}>
           {published ? "Unpublish" : "Publish"}

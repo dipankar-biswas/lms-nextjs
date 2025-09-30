@@ -6,12 +6,12 @@ const moduleSchema = new Schema({
     type: String,
   },
   description: {
-    required: true,
     type: String,
   },
-  status: {
+  active: {
     required: true,
-    type: String,
+    default: false,
+    type: Boolean,
   },
   slug: {
     required: true,
@@ -19,18 +19,20 @@ const moduleSchema = new Schema({
   },
   course: {
     required: true,
-    type: String,
+    type: Schema.ObjectId,
   },
-  lessonIds: {
-    required: true,
-    type: [String],
-  },
+  lessonIds: [{ type: Schema.ObjectId, ref: "Lesson" }],
   duration: {
+    type: Number,
+    default: 0,
+  },
+  order: {
     required: true,
     type: Number,
-  },
+  }
 });
 
 // ✅ Correct way to prevent OverwriteModelError
 export const Module =
   mongoose.models.Module || mongoose.model("Module", moduleSchema);
+  

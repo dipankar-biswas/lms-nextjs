@@ -50,7 +50,9 @@ const AddCourse = () => {
 
   const onSubmit = async (values) => {
     try {
-      const course = await createCourse(values);      
+      const course = await createCourse(values);  
+      console.log(course);
+          
       router.push(`/dashboard/courses/${course?._id}`);
       toast.success("Course created");
     } catch (error) {

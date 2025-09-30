@@ -11,6 +11,7 @@ export async function createCourse(data) {
         const loggedinUser = await getLoggedInUser();
         data["instructor"] = loggedinUser?.id;
         const course = await create(data);
+        return course;
     } catch (error) {
         throw new Error(error);
     }
@@ -25,27 +26,21 @@ export async function updateCourse(courseId,dataToUpdate) {
 }
 
 
-// export async function changePassword(email,oldPassword,newPassword,confirmPassword) {
-//     const isMatch = await validatePassword(email,oldPassword);
-//     if(!isMatch){
-//         throw new Error("Please enter a valid current password");
-//     }
 
-//     if(newPassword !== confirmPassword){
-//         throw new Error(`Error: Password and Confirm Password not Match.`);
-//     }
+export async function changeCoursePublishState(courseId) {
+    const course = await Course.findById(courseId);
+    try {
+        const res = await Course.findByIdAndUpdate(courseId,{ active: !course.active },{lean:true});
+        return res.active;
+    } catch (error) {
+        throw new Error(error);
+    }
+}
 
-//     const filter = {email:email};
-//     const hashedPassword = await bcrypt.hash(newPassword, 5);
-
-//     const dataToUpdate = {
-//         password : hashedPassword
-//     }
-
-//     try {
-//         await User.findOneAndUpdate(filter,dataToUpdate);
-//         revalidatePath('/account')
-//     } catch (error) {
-//         throw new Error(error);
-//     }
-// }
+export async function deleteCourse(courseId) {
+    try {
+        await Course.findByIdAndDelete(courseId);
+    } catch (error) {
+        throw new Error(error);
+    }
+}
