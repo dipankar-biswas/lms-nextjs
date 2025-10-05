@@ -28,7 +28,7 @@ export function LoginForm() {
         const response = await credentialLogin(formData);
         // console.log(response);
         
-        if(!!response.error){
+        if(response.error){
           // console.log(response.error);
           setError(response.error);
         }else{

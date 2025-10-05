@@ -4,8 +4,8 @@ import { signIn } from "@/auth"
 export async function credentialLogin(formData) {    
     try {
         const response = await signIn("credentials",{
-            email:formData.get("email")?.toString(),
-            password:formData.get("password")?.toString(),
+            email:formData.get("email"),
+            password:formData.get("password"),
             redirect:false
         })
         
